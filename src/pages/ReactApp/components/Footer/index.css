@@ -1,0 +1,35 @@
+.footer {
+  padding: 10px 0;
+  display: flex;
+  height: 50px;
+  width: 100%;
+  color: #666;
+  line-height: 30px;
+}
+
+.footer-left {
+  width: 100px;
+  height: 100%;
+}
+
+.footer-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.center-btn {
+  padding: 0 5px;
+  cursor: pointer;
+}
+
+.center-active-btn {
+  border: 1px solid pink;
+  border-radius: 3px;
+}
+
+.footer-right {
+  cursor: pointer;
+  width: 130px;
+}
