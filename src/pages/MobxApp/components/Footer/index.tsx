@@ -18,7 +18,7 @@ function Footer() {
   } = useTodoContext();
 
   return (
-    <footer className="footer">
+    <footer className="footer-container">
       <div className="footer-left">{activeCount || 0} item left</div>
       <div className="footer-center">
         {[ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS].map((item) => {
