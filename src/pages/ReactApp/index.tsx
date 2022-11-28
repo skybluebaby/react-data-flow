@@ -1,113 +1,137 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
-import Section from './components/Section';
+import TodoList from './components/TodoList';
 import Footer from './components/Footer';
-import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS } from '../../constants';
+import { fetchTodoList } from './api/todoListAPI';
+import {
+  ALL_TODOS,
+  ACTIVE_TODOS,
+  COMPLETED_TODOS,
+  TEMP_STYLE,
+} from '../../constants';
 
 export type Todo = {
   id: number;
-  name: string;
+  text: string;
   completed: boolean;
 };
 
 function ReactApp() {
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [renderList, setRenderList] = useState<Todo[]>([]);
-  const [currentChoice, setCurrentChoice] = useState(ALL_TODOS);
-  const [activeCount, setActiveCount] = useState(0);
-  const [hasCompletedTodo, setHasCompletedTodo] = useState(false);
+  const [todoList, setTodoList] = useState<Todo[]>([]);
+  const [filteredTodos, setFilteredTodos] = useState<Todo[]>([]);
+  const [status, setStatus] = useState(ALL_TODOS);
+  const [requestStatus, setRequestStatus] = useState('idle');
 
   useEffect(() => {
-    if (currentChoice === ALL_TODOS) {
-      setRenderList(todos);
-    } else if (currentChoice === ACTIVE_TODOS) {
-      setRenderList(todos.filter((item) => !item.completed));
-    } else if (currentChoice === COMPLETED_TODOS) {
-      setRenderList(todos.filter((item) => item.completed));
+    if (status === ALL_TODOS) {
+      setFilteredTodos(todoList);
+    } else if (status === ACTIVE_TODOS) {
+      setFilteredTodos(todoList.filter((todo) => !todo.completed));
+    } else if (status === COMPLETED_TODOS) {
+      setFilteredTodos(todoList.filter((todo) => todo.completed));
     }
-  }, [todos, currentChoice]);
+  }, [todoList, status]);
 
-  useEffect(() => {
-    const activeList = todos.filter((item) => !item.completed);
-    const hasCompleted = todos.find((item) => item.completed);
-    if (hasCompleted) {
-      setHasCompletedTodo(true);
-    } else {
-      setHasCompletedTodo(false);
-    }
-    setActiveCount(activeList.length);
-  }, [todos]);
+  const changeStatus = (status: string) => {
+    setStatus(status);
+  };
 
-  const addTodo = (name: string) => {
-    setTodos((prev) => [...prev, { id: Date.now(), name, completed: false }]);
+  const addTodo = (text: string) => {
+    setTodoList((prev) => [
+      ...prev,
+      { id: Date.now(), text, completed: false },
+    ]);
   };
 
   // 批量修改已完成
-  const batchChangeTodoCompleted = () => {
-    const hasNoCompleted = todos.find((item) => !item.completed);
-    setTodos((prev) =>
-      prev.map((item) => ({ ...item, completed: !!hasNoCompleted }))
+  const toggleAllTodos = () => {
+    const todoItem = todoList.some((todo) => !todo.completed);
+    setTodoList((prev) =>
+      prev.map((item) => ({ ...item, completed: !!todoItem }))
     );
   };
 
   const deleteTodo = (id: number) => {
-    const deleteIndex = todos.findIndex((item) => item.id === id);
-    setTodos((prev) => prev.slice(deleteIndex, deleteIndex + 1));
+    setTodoList((prev) => prev.filter((todo) => todo.id !== id));
   };
 
-  const changeName = (id: number, name: string) => {
-    setTodos((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          return {
-            ...item,
-            name,
-          };
-        }
-        return item;
-      })
+  const editTodo = (id: number, text: string) => {
+    setTodoList((prev) =>
+      prev.map((todo) => (todo.id === id ? { ...todo, text } : todo))
     );
   };
 
-  const changeCompleted = (id: number) => {
-    setTodos((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          return {
-            ...item,
-            completed: !item.completed,
-          };
-        }
-        return item;
-      })
+  const completeTodo = (id: number) => {
+    setTodoList((prev) =>
+      prev.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
     );
   };
 
-  const clearCompletedTodo = () => {
-    const noCompletedTodo = todos.filter((item) => !item.completed);
-    setTodos(noCompletedTodo);
+  const clearCompleted = () => {
+    setTodoList((prev) => prev.filter((todo) => !todo.completed));
   };
+
+  const addTodosAsync = async () => {
+    setRequestStatus('loading');
+    try {
+      const res = await fetchTodoList();
+      setTodoList(res.data);
+      setRequestStatus('idle');
+    } catch (error) {
+      setRequestStatus('failed');
+    }
+  };
+
+  const renderTodoList = () => {
+    if (requestStatus === 'loading') {
+      return <div style={TEMP_STYLE}>loading...</div>;
+    } else if (requestStatus === 'failed') {
+      return <div style={{ ...TEMP_STYLE, color: 'red' }}>error</div>;
+    } else {
+      return (
+        <TodoList
+          filteredTodos={filteredTodos}
+          editTodo={editTodo}
+          deleteTodo={deleteTodo}
+          completeTodo={completeTodo}
+        />
+      );
+    }
+  };
+
+  const completedCount = todoList.filter((todo) => todo.completed).length;
+  const activeCount = todoList.filter((todo) => !todo.completed).length;
+  const todosCount = todoList.length;
 
   return (
     <>
-      <Header
-        todos={todos}
-        addTodo={addTodo}
-        batchChangeTodoCompleted={batchChangeTodoCompleted}
-      ></Header>
-      <Section
-        renderList={renderList}
-        deleteTodo={deleteTodo}
-        changeName={changeName}
-        changeCompleted={changeCompleted}
-      ></Section>
-      <Footer
-        activeCount={activeCount}
-        currentChoice={currentChoice}
-        changeCurrentChoice={setCurrentChoice}
-        hasCompletedTodo={hasCompletedTodo}
-        clearCompletedTodo={clearCompletedTodo}
-      ></Footer>
+      <Header addTodo={addTodo} />
+      <section className="main">
+        {!!todosCount && (
+          <span>
+            <input
+              className="toggle-all"
+              type="checkbox"
+              checked={completedCount === todosCount}
+              readOnly
+            />
+            <label onClick={() => toggleAllTodos()} />
+          </span>
+        )}
+        {renderTodoList()}
+        {!!todosCount && (
+          <Footer
+            completedCount={completedCount}
+            activeCount={activeCount}
+            status={status}
+            changeStatus={changeStatus}
+            clearCompleted={clearCompleted}
+            addTodosAsync={addTodosAsync}
+          />
+        )}
+      </section>
     </>
   );
 }
