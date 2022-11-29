@@ -1,110 +1,117 @@
-import React, { useContext } from 'react';
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS } from '../../constants';
+import { fetchTodoList } from './api/todoListAPI';
+
+export type TodoType = Pick<Todo, 'id' | 'text' | 'completed'>;
 
 export class Todo {
   id: number;
-  name: string;
+  text: string;
   completed: boolean;
-  constructor(name: string, completed: boolean) {
+  constructor({ id, text, completed }: TodoType) {
     makeAutoObservable(this);
-    this.id = Date.now();
-    this.name = name;
+    this.id = id;
+    this.text = text;
     this.completed = completed;
   }
 
-  changeName = (name: string) => {
-    this.name = name;
+  editText = (text: string) => {
+    this.text = text;
   };
 
-  changeCompleted = () => {
+  completeTodo = () => {
     this.completed = !this.completed;
   };
 }
-
-export class TodoStore {
-  todos: Todo[];
-  currentChoice: string;
+class TodoListStore {
+  todoList: Todo[];
+  status: string;
+  requestStatus: 'idle' | 'loading' | 'failed';
+  todoUnipueId: number;
   constructor() {
     makeAutoObservable(this);
-    this.todos = [];
-    this.currentChoice = ALL_TODOS;
-  }
-
-  // 渲染的list
-  get renderList() {
-    if (this.currentChoice === ALL_TODOS) {
-      return this.todos;
-    } else if (this.currentChoice === ACTIVE_TODOS) {
-      return this.activeList;
-    } else if (this.currentChoice === COMPLETED_TODOS) {
-      return this.completedList;
-    } else {
-      return [];
-    }
-  }
-
-  get completedList() {
-    return this.todos.filter((item) => item.completed);
+    this.todoList = [];
+    this.status = ALL_TODOS;
+    this.requestStatus = 'idle';
+    this.todoUnipueId = -1;
   }
 
   get activeList() {
-    return this.todos.filter((item) => !item.completed);
+    return this.todoList.filter((item) => !item.completed);
   }
 
   get activeCount() {
     return this.activeList.length;
   }
 
-  get isAllCompleted() {
-    return this.todos.every((item) => item.completed);
+  get completedList() {
+    return this.todoList.filter((item) => item.completed);
   }
 
-  get hasCompletedTodo() {
-    return this.todos.find((item) => item.completed);
+  get completedCount() {
+    return this.completedList.length;
   }
 
-  changeCurrentChoice = (choice: string) => {
-    this.currentChoice = choice;
+  // 渲染的list
+  get filteredTodos() {
+    switch (this.status) {
+      case ALL_TODOS:
+        return this.todoList;
+      case ACTIVE_TODOS:
+        return this.activeList;
+      case COMPLETED_TODOS:
+        return this.completedList;
+      default:
+        return [];
+    }
+  }
+
+  changeStatus = (status: string) => {
+    this.status = status;
   };
 
-  addTodo = (name: string) => {
-    this.todos.push(new Todo(name, false));
+  addTodo = (text: string) => {
+    this.todoList.push(
+      new Todo({ id: ++this.todoUnipueId, text, completed: false })
+    );
   };
 
   deleteTodo = (id: number) => {
-    const deleteIndex = this.todos.findIndex((item) => item.id === id);
-    this.todos.splice(deleteIndex, 1);
+    this.todoList = this.todoList.filter((todo) => todo.id !== id);
   };
 
   // 清空所有已完成的todo
-  clearCompletedTodo = () => {
-    this.todos = this.todos.filter((item) => !item.completed);
+  clearCompleted = () => {
+    this.todoList = this.todoList.filter((item) => !item.completed);
   };
 
-  // 批量改变是否已完成
-  batchChangeTodoCompleted = () => {
-    const hasNoCompleted = this.todos.find((item) => !item.completed);
-    this.todos.forEach((item) => (item.completed = !!hasNoCompleted));
+  toggleAllTodos = () => {
+    const hasNoCompleted = this.todoList.some((todo) => !todo.completed);
+    this.todoList.forEach((item) => (item.completed = hasNoCompleted));
+  };
+
+  fetchTodos = async () => {
+    this.requestStatus = 'loading';
+    try {
+      const { data } = await fetchTodoList();
+      runInAction(() => {
+        this.requestStatus = 'idle';
+        data.forEach((todo) => {
+          this.todoList.push(
+            new Todo({
+              id: ++this.todoUnipueId,
+              text: todo.text,
+              completed: todo.completed,
+            })
+          );
+        });
+      });
+    } catch (error) {
+      runInAction(() => {
+        this.requestStatus = 'failed';
+      });
+    }
   };
 }
 
-const TodoStoreContext = React.createContext<TodoStore>(
-  null as unknown as TodoStore
-);
-
-export const useTodoContext = () => useContext(TodoStoreContext);
-
-type Props = {
-  children: React.ReactNode;
-};
-
-export default function TodoStoreProvide({ children }: Props) {
-  const store = React.useRef(new TodoStore());
-
-  return (
-    <TodoStoreContext.Provider value={store.current}>
-      {children}
-    </TodoStoreContext.Provider>
-  );
-}
+export default TodoListStore;

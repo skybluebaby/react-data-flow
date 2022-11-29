@@ -17,5 +17,5 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: ['react', 'mobx', '@typescript-eslint'],
-  rules: { 'mobx/missing-observer': 'off' },
+  rules: { 'mobx/missing-observer': 'off', 'no-debugger': 'off' },
 };
