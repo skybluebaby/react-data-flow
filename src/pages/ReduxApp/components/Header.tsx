@@ -1,5 +1,5 @@
 import React from 'react';
-import TodoTextInput from './TodoTextInput';
+import TodoTextInput from '../../../components/TodoTextInput';
 import { useAppDispatch } from '../store/hooks';
 import { addTodo } from '../features/todoList/todoListSlice';
 
