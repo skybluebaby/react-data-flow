@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 import classnames from 'classnames';
-import TodoTextInput from './TodoTextInput';
+import TodoTextInput from '@/components/TodoTextInput';
 import { Todo } from '../';
 
 export type TodoItemProps = {

@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import TodoTextInput from '../../../components/TodoTextInput';
+import TodoTextInput from 'components/TodoTextInput';
 
 type HeaderProps = {
   addTodo: (text: string) => void;

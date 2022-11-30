@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import classnames from 'classnames';
-import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS } from '../../../constants';
+import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS } from '@/constants';
 
 type FooterProps = {
   status: string;

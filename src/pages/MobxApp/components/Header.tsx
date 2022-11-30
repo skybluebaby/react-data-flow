@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import TodoTextInput from '../../../components/TodoTextInput';
+import TodoTextInput from 'components/TodoTextInput';
 import { useTodoContext } from '../TodoContext';
 
 const Header = () => {

@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS } from '../../constants';
-import { fetchTodoList } from './api/todoListAPI';
+import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS } from '@/constants';
+import { fetchTodoListResolve } from '@/api/todoListAPI';
 
 export type TodoType = Pick<Todo, 'id' | 'text' | 'completed'>;
 
@@ -27,13 +27,13 @@ class TodoListStore {
   todoList: Todo[];
   status: string;
   requestStatus: 'idle' | 'loading' | 'failed';
-  todoUnipueId: number;
+  todoUuid: number;
   constructor() {
     makeAutoObservable(this);
     this.todoList = [];
     this.status = ALL_TODOS;
     this.requestStatus = 'idle';
-    this.todoUnipueId = -1;
+    this.todoUuid = -1;
   }
 
   get activeList() {
@@ -72,7 +72,7 @@ class TodoListStore {
 
   addTodo = (text: string) => {
     this.todoList.push(
-      new Todo({ id: ++this.todoUnipueId, text, completed: false })
+      new Todo({ id: ++this.todoUuid, text, completed: false })
     );
   };
 
@@ -93,13 +93,13 @@ class TodoListStore {
   fetchTodos = async () => {
     this.requestStatus = 'loading';
     try {
-      const { data } = await fetchTodoList();
+      const { data } = await fetchTodoListResolve();
       runInAction(() => {
         this.requestStatus = 'idle';
         data.forEach((todo) => {
           this.todoList.push(
             new Todo({
-              id: ++this.todoUnipueId,
+              id: ++this.todoUuid,
               text: todo.text,
               completed: todo.completed,
             })

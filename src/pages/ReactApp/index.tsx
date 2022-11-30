@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import TodoList from './components/TodoList';
 import Footer from './components/Footer';
-import { fetchTodoList } from './api/todoListAPI';
+import { fetchTodoList } from '@/api/todoListAPI';
 import {
   ALL_TODOS,
   ACTIVE_TODOS,
   COMPLETED_TODOS,
   TEMP_STYLE,
-} from '../../constants';
+} from '@/constants';
 
 export type Todo = {
   id: number;

@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react';
 import classnames from 'classnames';
 import { observer } from 'mobx-react-lite';
-import TodoTextInput from '../../../components/TodoTextInput';
+import TodoTextInput from 'components/TodoTextInput';
 import { Todo } from '../TodoStore';
 import { useTodoContext } from '../TodoContext';
 

@@ -10,7 +10,7 @@ import {
   InitialState,
   addTodosAsync,
 } from '../features/todoList/todoListSlice';
-import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS } from '../../../constants';
+import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS } from '@/constants';
 
 const Footer = () => {
   const dispatch = useAppDispatch();

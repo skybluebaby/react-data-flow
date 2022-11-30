@@ -2,7 +2,7 @@ import React from 'react';
 import classnames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import { useTodoContext } from '../TodoContext';
-import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS } from '../../../constants';
+import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS } from '@/constants';
 
 const Footer = () => {
   const { activeCount, completedCount, status, changeStatus, clearCompleted } =

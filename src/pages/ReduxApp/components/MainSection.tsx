@@ -8,7 +8,7 @@ import {
   toggleAllTodos,
   selectRequestStatus,
 } from '../features/todoList/todoListSlice';
-import { TEMP_STYLE } from '../../../constants';
+import { TEMP_STYLE } from '@/constants';
 
 const MainSection = () => {
   const dispatch = useAppDispatch();

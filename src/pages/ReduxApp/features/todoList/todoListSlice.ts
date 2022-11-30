@@ -1,11 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../../store';
-import { fetchTodoList } from './todoListAPI';
-import {
-  ALL_TODOS,
-  ACTIVE_TODOS,
-  COMPLETED_TODOS,
-} from '../../../../constants';
+import { fetchTodoList } from '@/api/todoListAPI';
+import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS } from '@/constants';
 
 export type Todo = {
   id: number;

@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import Footer from './Footer';
 import TodoList from './TodoList';
 import { useTodoContext } from '../TodoContext';
-import { TEMP_STYLE } from '../../../constants';
+import { TEMP_STYLE } from '@/constants';
 
 const MainSection = () => {
   const {
